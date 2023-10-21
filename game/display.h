@@ -1,7 +1,9 @@
 #ifndef _DISPLAY_H_
 #define _DISPLAY_H_
 
-#include<bits/stdc++.h>
+#include<vector>
+#include<string>
+#include<iostream>
 #include<windows.h>
 #include<conio.h>
 using namespace std;
@@ -9,6 +11,15 @@ using namespace std;
 void gotoxy(short x, short y) {
   COORD coord = {x, y};
   SetConsoleCursorPosition(GetStdHandle(STD_OUTPUT_HANDLE), coord);
+}
+
+int get_utf8_len(int c)
+{
+	if((c & 128) == 0) return 1;
+	if((c & 32) == 0) return 2;
+	if((c & 16) == 0) return 3;
+	if((c & 8) == 0) return 4;
+	return -1;
 }
 
 /*
@@ -49,58 +60,87 @@ void basic_display(vector<string> msg, vector<string> opt, int curopt)
 		"┃                                                                ┃",
 		"┃                                                                ┃",
 		"┗━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┛",
-	}
+	};
 	
-	const int W = 64;
-	const int msg_beg_x = 1, msg_beg_y = 2;
-	const int opt_beg_x = 17, opt_beg_y = 2;
+	const int W = 60;
+	const int msg_beg_x = 2, msg_beg_y = 4;
+	const int opt_beg_x = 17, opt_beg_y = 4;
 	
 	int curx = msg_beg_x;
 	for(int i=0; i<(int)msg.size(); ++i)
 	{
-		s[curx][0] = '*';
+		s[curx][msg_beg_y] = '*';
 		
 		int cury = msg_beg_y + 2;
+		int curlen = 2;
+		
 		for(int j=0; j<(int)msg[i].size(); ++j)
 		{
 			if(msg[i][j] == 0) break;
 			
-			if(0 < msg[i][j] && msg[i][j] < 127)
+			int k = get_utf8_len(msg[i][j]);
+			if(curlen + k > W)
 			{
-				if(cury >= msg_beg_y + W)
-					++curx, cury = msg_beg_y + 2;
-				
+				++curx;
+				cury = msg_beg_y + 2;
+				curlen = 2;
+			}
+			
+			if(k == 1)
+			{
 				s[curx][cury++] = msg[i][j];
+				curlen += 1;
 			}
 			else
 			{
-				if(cury + 1 >= msg_beg_y + W)
-					++curx, cury = msg_beg_y + 2;
-				
 				s[curx][cury++] = msg[i][j];
 				s[curx][cury++] = msg[i][j+1];
-				j += 1;
+				for(int l=2; l<k; ++l)
+					s[curx].insert(s[curx].begin() + cury, msg[i][j+l]), ++cury;
+				j += k-1;
+				curlen += 2;
 			}
 		}
 		
 		curx += 2;
 	}
 	
-	int curx = opt_beg_x;
+	curx = opt_beg_x;
 	for(int i=0; i<(int)opt.size(); ++i)
 	{
-		int cury = opy_beg_y + 2;
+		int cury = opt_beg_y + 2;
 		s[curx][cury++] = 'A' + i;
+		s[curx][cury++] = '.';
 		s[curx][cury++] = ' ';
-		for(auto c: opt[i])
-			s[curx][cury++] = c;
+		
+		for(int j=0; j<(int)opt[i].size(); ++j)
+		{
+			if(opt[i][j] == 0) break;
+			
+			int k = get_utf8_len(opt[i][j]);
+			if(k == 1)
+			{
+				s[curx][cury++] = opt[i][j];
+			}
+			else
+			{
+				s[curx][cury++] = opt[i][j];
+				s[curx][cury++] = opt[i][j+1];
+				for(int l=2; l<k; ++l)
+					s[curx].insert(s[curx].begin() + cury, opt[i][j+l]), ++cury;
+				j += k-1;
+			}
+		}
+		
 		s[curx][cury++] = ' ';
 		
 		if(i == curopt)
 		{
-			s[curx][0] = '-';
+			s[curx][opt_beg_y] = '-';
 			s[curx][cury] = '-';
 		}
+		
+		++curx;
 	}
 	
 	gotoxy(0,0);
@@ -119,63 +159,19 @@ int display(std::vector<std::string> msg, std::vector<std::string> opt)
 	bool reprint = 0;
 	int curopt = 0;
 	
-	auto print_opt = [&] (void)
-	{
-		for(int i=0; i<(int)opt.size(); ++i)
-		{
-			auto t = opt[i];
-			t = std::string(1, char('A' + i)) + ". " + t;
-			if(i == curopt)
-				t = "- " + t + " -";
-			else
-				t = "  " + t + "  ";
-			std::cout << t << std::string(50 - (int)t.size(), ' ') << std::endl;
-		}
-		for(int i=(int)opt.size(); i<7; ++i)
-		{
-			std::cout << std::string(50, ' ') << std::endl;
-		}
-	};
-	
-	gotoxy(0,0);
-	for(int i=0; i<10; ++i)
-	{
-		std::cout << std::string(50, ' ') << std::endl;
-	}
-	print_opt();
-	
 	for(int i=0; i<(int)msg.size(); ++i)
 	{
-		gotoxy(0,0);
-		for(int j=0; j<=i; ++j)
-		{
-			std::cout << msg[j] << std::endl;
-		}
+		basic_display(vector<string>(msg.begin(), msg.begin() + i + 1), opt, curopt);
 		if(i+1<(int)opt.size())
-			Sleep(50);
+			Sleep(10);
 	}
-	for(int j=(int)msg.size(); j<10; ++j)
-	{
-		std::cout << std::string(50, ' ') << std::endl;
-	}
-	print_opt();
 	
 	while(1)
 	{
 		if(reprint)
 		{
 			reprint = 0;
-			
-			gotoxy(0,0);
-			for(const auto &t: msg)
-			{
-				std::cout << t << std::endl;
-			}
-			for(int i=(int)msg.size(); i<10; ++i)
-			{
-				std::cout << std::string(10, ' ') << std::endl;
-			}
-			print_opt();
+			basic_display(msg, opt, curopt);
 		}
 		
 		if(kbhit() != 0)
