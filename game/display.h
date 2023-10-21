@@ -9,8 +9,8 @@
 using namespace std;
 
 void gotoxy(short x, short y) {
-  COORD coord = {x, y};
-  SetConsoleCursorPosition(GetStdHandle(STD_OUTPUT_HANDLE), coord);
+	COORD coord = {x, y};
+	SetConsoleCursorPosition(GetStdHandle(STD_OUTPUT_HANDLE), coord);
 }
 
 int get_utf8_len(int c)
@@ -159,11 +159,11 @@ int display(std::vector<std::string> msg, std::vector<std::string> opt)
 	bool reprint = 0;
 	int curopt = 0;
 	
-	for(int i=0; i<(int)msg.size(); ++i)
+	for(int i=-1; i<(int)msg.size(); ++i)
 	{
 		basic_display(vector<string>(msg.begin(), msg.begin() + i + 1), opt, curopt);
-		if(i+1<(int)opt.size())
-			Sleep(10);
+		if(i+1<(int)msg.size())
+			Sleep(100);
 	}
 	
 	while(1)
