@@ -79,7 +79,7 @@ void basic_display(vector<string> msg, vector<string> opt, int curopt)
 			if(msg[i][j] == 0) break;
 			
 			int k = get_utf8_len(msg[i][j]);
-			if(curlen + k > W)
+			if(curlen + min(k,2) > W)
 			{
 				++curx;
 				cury = msg_beg_y + 2;
@@ -161,10 +161,13 @@ int display(std::vector<std::string> msg, std::vector<std::string> opt)
 	
 	for(int i=-1; i<(int)msg.size(); ++i)
 	{
-		basic_display(vector<string>(msg.begin(), msg.begin() + i + 1), opt, curopt);
-		if(i+1<(int)msg.size())
-			Sleep(100);
+		basic_display(vector<string>(msg.begin(), msg.begin() + i + 1), opt, -1);
+		Sleep(100);
 	}
+	
+	while(kbhit()) getch();
+	
+	reprint = 1;
 	
 	while(1)
 	{
