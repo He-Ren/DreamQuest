@@ -183,6 +183,66 @@ void display_init(void)
 	system("cls");
 }
 
+void display_quit(void)
+{
+	const int begx = 37, begy = 14;
+	
+	vector< vector<string> > s;
+	int curopt = 1;
+	
+	s.push_back({
+		" ┏━━━━━━━━━━━━━━━━━━━┓ ",
+		" ┃      退出游戏？   ┃ ",
+		" ┣━━━━━━━━━┳━━━━━━━━━┫ ",
+		" ┃  >确定< ┃   取消  ┃ ",
+		" ┗━━━━━━━━━┻━━━━━━━━━┛ "
+	});
+	s.push_back({
+		" ┏━━━━━━━━━━━━━━━━━━━┓ ",
+		" ┃      退出游戏？   ┃ ",
+		" ┣━━━━━━━━━┳━━━━━━━━━┫ ",
+		" ┃   确定  ┃  >取消< ┃ ",
+		" ┗━━━━━━━━━┻━━━━━━━━━┛ "
+	});
+	
+	bool reprint = 1;
+	while(1)
+	{
+		if(reprint)
+		{
+			reprint = 0;
+			
+			for(int i=0; i<(int)s[curopt].size(); ++i)
+			{
+				gotoxy(begx, begy+i);
+				cout << s[curopt][i];
+			}
+		}
+		
+		if(kbhit() != 0)
+		{
+			int c = getch();
+			if(c == VK_RETURN)
+			{
+				if(curopt == 0)
+					exit(0);
+				return;
+			}
+			
+			if(c == 'A' || c == 'a')
+			{
+				if(curopt == 1)
+					curopt = 0, reprint = 1;
+			}
+			if(c == 'D' || c == 'd')
+			{
+				if(curopt == 0)
+					curopt = 1, reprint = 1;
+			}
+		}
+	}
+}
+
 /*
 ┏━┳┓
 ┃ ┃┃
@@ -428,11 +488,13 @@ int display(vector<string> msg, vector<string> opt)
 			int c = getch();
 			if(c == VK_RETURN)
 			{
-				return curopt;
+				if(0 <= curopt && curopt < (int)opt.size())
+					return curopt;
 			}
-			if(c == 'Q')
+			if(c == 'Q' || c == 'q')
 			{
-				exit(0);
+				display_quit();
+				reprint = 1;
 			}
 			
 			if('1' <= c && c <= '1' + (int)opt.size() - 1)
@@ -468,13 +530,15 @@ int display(vector<string> msg, vector<string> opt)
 
 void display_lose(vector<string> msg)
 {
-	display(msg, {"结束游戏"});
+	msg.push_back("按Q结束游戏");
+	display(msg, {});
 	exit(0);
 }
 
 void display_win(vector<string> msg)
 {
-	display(msg, {"结束游戏"});
+	msg.push_back("按Q结束游戏");
+	display(msg, {});
 	exit(0);
 }
 
