@@ -235,7 +235,7 @@ void display_basic0(vector<string> s, vector<string> msg, vector<string> opt, in
 	}
 	else
 	{
-		riglist.push_back("下次考试日期未知");
+		riglist.push_back("无已知考试");
 	}
 	
 	if(homework_ddl > current_date)
@@ -284,7 +284,7 @@ void display_basic0(vector<string> s, vector<string> msg, vector<string> opt, in
 	}
 	else
 	{
-		ldlist.push_back("微积分能力值/要求（" + to_string(calculus_value) + "/ ?");
+		ldlist.push_back("微积分能力值/要求（" + to_string(calculus_value) + "/???）");
 		rdlist.push_back("无已知考试");
 	}
 	

@@ -978,18 +978,21 @@ void lesson_no_lesson(int, int)
 	else if(opt_id[t] == 12)// 游戏天赋
 	{
 		display_win({
+			"你触发了隐藏结局！",
 			"你加入了战队，前途一片光明"
 		});
 	}
 	else if(opt_id[t] == 13)// 音乐天赋
 	{
 		display_win({
+			"你触发了隐藏结局！",
 			"你成为了音乐家，前途一片光明"
 		});
 	}
 	else if(opt_id[t] == 14)// 体育天赋
 	{
 		display_win({
+			"你触发了隐藏结局！",
 			"你加入了校队，前途一片光明"
 		});
 	}
@@ -1103,6 +1106,163 @@ void lesson_physical_education(int,int)
 	check_alive();
 }
 
+void guide(void)
+{
+	bool reprint = 1;
+	
+	while(1)
+	{
+		if(reprint)
+		{
+			reprint = 0;
+			
+			system("cls");
+			
+			cout << "DreamQuest - by 德法34组" << endl;
+			cout << endl;
+			
+			cout << "游戏内容完全虚构，如有雷同，纯属巧合。" << endl;
+			
+			cout << "游戏过程中请不要调整窗口长宽比或者滚动窗口，否则可能造成显示问题。" << endl;
+			cout << "作者技术力有限，如有字体等问题，我们深感抱歉。" << endl;
+			
+			cout << endl;
+			cout << "抵制不良游戏，拒绝盗版游戏。" << endl;
+			cout << "注意自我保护，谨防受骗上当。" << endl;
+			cout << "适度游戏益脑，沉迷游戏伤身。" << endl;
+			cout << "合理安排时间，享受健康生活。" << endl;
+			cout << endl;
+			
+			cout << "按 Enter 键开始游戏 . . ." << endl;
+		}
+		
+		if(kbhit() != 0)
+		{
+			int c = getch();
+			if(c == VK_RETURN)
+			{
+				break;
+			}
+			reprint = 1;
+		}
+	}
+	
+	display({
+		"欢迎进入大学生活！",
+		"使用 W/S 或数字键切换选项",
+		"使用 Enter 键选择"
+	},{
+		"确定",
+		"不取消",
+		"同意",
+		"不反对",
+		"已知晓",
+	});
+	
+	int skipguide = display({
+		"跳过新手教程？"
+	},{
+		"否",
+		"是"
+	});
+	
+	if(skipguide == 1)
+	{
+		display({
+			"欢迎来到 DreamQuest，祝您游玩愉快！",
+		},{
+			"开始游戏",
+		});
+		return;
+	}
+	
+	int pageid = 0;
+	vector< vector<string> > all_pages;
+	
+	all_pages.push_back({
+		"看到下面的一栏了吗？",
+		"你需要保持希望值和体力值大于 0",
+	});
+	
+	all_pages.push_back({
+		"本游戏中，大学生活有30周",
+		"这是你的课表：",
+		"|  周一  | 周二 |  周三  | 周四 | 周五 | 周六 | 周日 |",
+		"| 微积分 | 思政 | 微积分 |      | 体育 |      |      |"
+		"",
+		"注：思政表示思想道德与法治"
+	});
+	
+	all_pages.push_back({
+		"周一周三：微积分",
+		"微积分会有作业和考试",
+		"作业每周一布置，下周一截止，三次逾期会被劝退",
+		"考试有两次，分别在第15和30周的周日",
+	});
+	
+	all_pages.push_back({
+		"看到下方的微积分能力值了吗？考试会有微积分能力值的要求，考试时达不到要求会被劝退",
+		"上课、做作业、复习都会提高能力值，但是作业逾期会有能力值的惩罚"
+	});
+	
+	all_pages.push_back({
+		"周二：思想道德与法治",
+		"这门课上干任何事情，对比平时都会有增益效果！"
+	});
+	
+	all_pages.push_back({
+		"周五：体育",
+		"体育课不能翘，并且会消耗体力值，请注意！"
+	});
+	
+	all_pages.push_back({
+		"没课时，你可以做各种活动",
+		"某些活动有隐藏的属性值，专精某一方面可以触发隐藏结局！"
+	});
+	
+	all_pages.push_back({
+		"读论文有概率产生idea",
+		"3个idea可以写一篇论文",
+		"idea和论文可以大幅提高希望值",
+		"注意，写论文有小概率失败，此时会大幅减少希望值",
+		"结束时有3篇及以上的论文会触发隐藏结局！"
+	});
+	
+	all_pages.push_back({
+		"欢迎来到 DreamQuest，祝您游玩愉快！",
+	});
+	
+	while(1)
+	{
+		if(pageid == (int)all_pages.size() - 1)
+		{
+			int t = display(all_pages[pageid], {
+				"开始游戏",
+				"上一页"
+			});
+			if(t == 0) break;
+			
+			pageid -= 1;
+		}
+		else if(pageid == 0)
+		{
+			display(all_pages[pageid], {
+				"下一页"
+			});
+			++pageid;
+		}
+		else
+		{
+			int t = display(all_pages[pageid], {
+				"下一页",
+				"上一页"
+			});
+			if(t == 0) ++pageid;
+			else --pageid;
+		}
+	}
+}
+
 /*
 结局
 */
@@ -1135,6 +1295,7 @@ void ending(void)
 		if(paper_count >= 3)
 		{
 			display_win({
+				"你触发了隐藏结局！",
 				"你选择做科研",
 				"由于你在大学发表了多篇论文，你成为了学界大牛"
 			});
@@ -1232,7 +1393,9 @@ int main(void)
 	homework_ddl = -1;
 	homework_finished = 0;
 	homework_failed_count = 0;
-		
+	
+	guide();
+	
 	for(int i=0; i<finish_date; ++i)
 	{
 		current_date = i;
