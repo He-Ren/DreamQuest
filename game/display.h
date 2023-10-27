@@ -75,8 +75,8 @@ int display(vector<string> msg, vector<string> opt)
 
 void display_lose(vector<string> msg)
 {
-	cout << "当前天数：" << current_date;
-	cout << "结束天数：" << finish_date;
+	cout << "当前天数：" << current_date << endl;
+	cout << "结束天数：" << finish_date << endl;
 	cout << "当前是第 " << current_date / 7 + 1 << " 周的第 " << current_date % 7 + 1 << " 天 " << endl;
 	cout << "共 " << finish_date / 7 << " 周" << endl; 
 	
