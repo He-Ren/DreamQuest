@@ -795,7 +795,7 @@ void lesson_development(int, int)
 	{
 		int t = display(msg, {
 			"听课",
-			"翘课"
+			"摸鱼"
 		});
 		
 		if(t == 0)
@@ -814,7 +814,7 @@ void lesson_development(int, int)
 			society_value += 2;
 			
 			vector<string> msg2;
-			msg2.push_back("课上深邃的思想让你对未来充满希望");
+			msg2.push_back("思政深邃的思想让你对未来充满希望");
 			
 			display(msg2, {"确定"});
 			
