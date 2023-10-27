@@ -3,6 +3,7 @@
 #include <locale>
 #include <codecvt>
 #include <windows.h>
+using namespace std;
 
 bool IsFullWidthCharacter(const std::wstring& utf16String) {
     // 获取控制台信息，以确定字符宽度
@@ -21,6 +22,14 @@ bool IsFullWidthCharacter(const std::wstring& utf16String) {
 }
 
 int main() {
+    system("chcp 65001");
+    for(auto c: "│")
+    {
+        printf("%d\n",(int)(unsigned char)c);
+    }
+    cout << "a│a" << endl;
+    return 0;
+    
     // 输入要测量的 UTF-8 字符串
     std::string utf8Character = "你"; // 例如，你可以将要测量的 UTF-8 字符串放在这里
 
@@ -34,5 +43,6 @@ int main() {
         std::cout << "半角字符" << std::endl;
     }
 
+    system("pause");
     return 0;
 }
