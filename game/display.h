@@ -55,10 +55,12 @@ string get_process_string(int len,int a,int b)
 	int cnt = (len / 2 * 8) * p;
 	
 	string res;
-	while(cnt >= 8)
-		res += process_symbols[7] + ' ', cnt -= 8;
-	if(cnt)
-		res += process_symbols[cnt - 1] + ' ';
+	while(cnt > 0)
+	{
+		int k = min(cnt, 8);
+		res += process_symbols[k - 1];
+		cnt -= min(k, 4);
+	}
 	
 	return res;
 }

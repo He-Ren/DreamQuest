@@ -6,6 +6,8 @@ int main(void)
 {
 	display_init();
 	
+	cout << process_symbols[4] << process_symbols[3] << process_symbols[2] << endl;
+	
 	for(auto s: process_symbols)
 	{
 		for(auto t: s)
