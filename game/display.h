@@ -24,8 +24,8 @@ int display(vector<string> msg, vector<string> opt)
 {
 	system("cls");
 	
-	cout << "当前天数：" << current_date;
-	cout << "结束天数：" << finish_date;
+	cout << "当前天数：" << current_date << endl;
+	cout << "结束天数：" << finish_date << endl;
 	cout << "当前是第 " << current_date / 7 + 1 << " 周的第 " << current_date % 7 + 1 << " 天 " << endl;
 	cout << "共 " << finish_date / 7 << " 周" << endl; 
 	
@@ -107,6 +107,48 @@ void display_lose(vector<string> msg)
 	cout << endl;
 	cout << "失败" << endl;
 	cout << "失败信息：" << endl;
+	for(auto t: msg)
+	{
+		cout << t << endl;
+	}
+	system("pause");
+	exit(0);
+}
+
+void display_win(vector<string> msg)
+{
+	cout << "当前天数：" << current_date << endl;
+	cout << "结束天数：" << finish_date << endl;
+	cout << "当前是第 " << current_date / 7 + 1 << " 周的第 " << current_date % 7 + 1 << " 天 " << endl;
+	cout << "共 " << finish_date / 7 << " 周" << endl; 
+	
+	cout << "希望值：     " << hope_value << endl;
+	cout << "希望值上限： " << hope_value_lim << endl;
+	
+	
+	cout << "体力值：     " << energy_value << endl;
+	cout << "体力值上限： " << energy_value_lim << endl;
+	
+	cout << "微积分能力值：     " << calculus_value << endl;
+	
+	cout << "idea 个数： " << idea_count << endl;
+	cout << "paper 个数：" << paper_count << endl;
+	
+	cout << "（隐藏）游戏能力值：" << game_value << endl;
+	cout << "（隐藏）音乐能力值：" << music_value << endl;
+	cout << "（隐藏）社会能力值：" << society_value << endl;
+	
+	cout << "下次考试时间：" << next_exam_date << endl;
+	cout << "下次考试需要的能力值" << next_exam_require << endl;
+	
+	cout << "作业总数：     " << homework_tot << endl;
+	cout << "作业ddl：      " << homework_ddl << endl;
+	cout << "当前完成作业数：" << homework_finished << endl;
+	cout << "作业逾期次数  ：" << homework_failed_count << endl;
+	
+	cout << endl;
+	cout << "获胜" << endl;
+	cout << "获胜信息：" << endl;
 	for(auto t: msg)
 	{
 		cout << t << endl;

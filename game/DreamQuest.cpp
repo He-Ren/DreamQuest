@@ -606,6 +606,9 @@ void action_attend_concert(Lesson_id)
 	check_alive();
 }
 
+/*
+微积分课
+*/
 void lesson_calculus(int week_id, int weekday_id)
 {
 	if(current_date == homework_ddl && homework_finished != homework_tot)
@@ -779,6 +782,9 @@ void lesson_calculus(int week_id, int weekday_id)
 	}
 }
 
+/*
+思想道德与法治课
+*/
 void lesson_development(int, int)
 {
 	vector<string> msg;
@@ -858,6 +864,9 @@ void lesson_development(int, int)
 	}
 }
 
+/*
+平时
+*/
 void lesson_no_lesson(int, int)
 {
 	vector<string> msg;
@@ -865,57 +874,338 @@ void lesson_no_lesson(int, int)
 	msg.push_back("今天没有课");
 	
 	vector<string> opt;
+	vector<int> opt_id;
 	
-	opt.push_back("做微积分作业");
-	opt.push_back("复习微积分");
-	opt.push_back("读论文");
-	opt.push_back("运动");
-	opt.push_back("打游戏");
-	opt.push_back("练琴");
-	opt.push_back("阅读一些时政新闻");
-	opt.push_back("休息一天");
+	auto push = [&] (int id, string s)
+	{
+		opt.push_back(s);
+		opt_id.push_back(id);
+	};
+	
+	push(0, "做微积分作业");
+	push(1, "复习微积分");
+	push(2, "读论文");
+	push(3, "运动");
+	push(4, "打游戏");
+	push(5, "练琴");
+	push(6, "阅读一些时政新闻");
+	push(7, "休息一天");
 	if(idea_count >= 3)
-		opt.push_back("花3个idea写篇论文");
+		push(8, "花3个idea写篇论文");
+	
+	int oth = rnd(0, 100 - 1);
+	if(0 <= oth && oth < 5)
+	{
+		msg.push_back("群公告：今天有社工活动，大家自愿参加");
+		push(9, "参加社工活动");
+	}
+	else if(5 <= oth && oth < 10)
+	{
+		msg.push_back("群公告：今天有数学讲座，大家自愿参加");
+		push(10, "参加数学讲座");
+	}
+	else if(10 <= oth && oth < 15)
+	{
+		msg.push_back("群公告：今天有音乐会，大家自愿参加");
+		push(11, "参加音乐会");
+	}
+	else if(15 <= oth && oth < 17 && game_value >= 60)
+	{
+		msg.push_back("某战队发现了你的游戏天赋，邀请你加入");
+		push(12, "接受游戏战队的邀请（结束游戏）");
+	}
+	else if(17 <= oth && oth < 19 && music_value >= 60)
+	{
+		msg.push_back("某星探发现了你的音乐才能，邀请你参加演出");
+		push(13, "接受星探的邀请（结束游戏）");
+	}
+	else if(19 <= oth && oth < 21 && energy_value_lim >= 200)
+	{
+		msg.push_back("校队发现了你的体育天赋，邀请你加入");
+		push(14, "接受校队的邀请（结束游戏）");
+	}
 	
 	int t = display(msg, opt);
 	
-	if(t == 0)// 做微积分作业
+	if(opt_id[t] == 0)// 做微积分作业
 	{
 		action_do_calculus_homework(Nolesson);
 	}
-	else if(t == 1)// 复习微积分
+	else if(opt_id[t] == 1)// 复习微积分
 	{
 		action_review_calculus(Nolesson);
 	}
-	else if(t == 2)// 读论文
+	else if(opt_id[t] == 2)// 读论文
 	{
 		action_read_paper(Nolesson);
 	}
-	else if(t == 3)// 运动
+	else if(opt_id[t] == 3)// 运动
 	{
 		action_do_sport(Nolesson);
 	}
-	else if(t == 4)// 打游戏
+	else if(opt_id[t] == 4)// 打游戏
 	{
 		action_play_game(Nolesson);
 	}
-	else if(t == 5)// 练琴
+	else if(opt_id[t] == 5)// 练琴
 	{
 		action_practice_music(Nolesson);
 	}
-	else if(t == 6)// 阅读一些时政新闻
+	else if(opt_id[t] == 6)// 阅读一些时政新闻
 	{
 		action_read_news(Nolesson);
 	}
-	else if(t == 7)// 休息一天
+	else if(opt_id[t] == 7)// 休息一天
 	{
 		action_do_nothing(Nolesson);
 	}
-	else if(t == 8)// 花3个idea写篇论文
+	else if(opt_id[t] == 8)// 花3个idea写篇论文
 	{
 		action_write_paper(Nolesson);
 	}
+	else if(opt_id[t] == 9)// 参加社工活动
+	{
+		action_do_social_activities(Nolesson);
+	}
+	else if(opt_id[t] == 10)// 参加数学讲座
+	{
+		action_attend_math_lecture(Nolesson);
+	}
+	else if(opt_id[t] == 11)// 参加音乐会
+	{
+		action_attend_concert(Nolesson);
+	}
+	else if(opt_id[t] == 12)// 游戏天赋
+	{
+		display_win({
+			"你加入了战队，前途一片光明"
+		});
+	}
+	else if(opt_id[t] == 13)// 音乐天赋
+	{
+		display_win({
+			"你成为了音乐家，前途一片光明"
+		});
+	}
+	else if(opt_id[t] == 14)// 体育天赋
+	{
+		display_win({
+			"你加入了校队，前途一片光明"
+		});
+	}
 }
+
+/*
+微积分考试
+*/
+void lesson_calculus_exam(int,int)
+{
+	vector<string> msg;
+	
+	msg.push_back("今天是微积分考试");
+	
+	msg.push_back("考试要求的能力值为 " + to_string(next_exam_require));
+	
+	if(calculus_value < next_exam_require)
+	{
+		msg.push_back("很可惜，你没有达到要求");
+		
+		display(msg, {
+			"确定"
+		});
+		
+		display_lose({
+			"你挂科了，学校为你安排了退学"
+		});
+	}
+	
+	int delta_H = 10;
+	int delta_E = -5;
+	
+	update_hope_value(delta_H);
+	update_energe_value(delta_E);
+	
+	msg.push_back("你通过了考试");
+	
+	display(msg, {
+		"确定"
+	});
+	
+	check_alive();
+	
+	next_exam_date = -1;
+	next_exam_require = -1;
+}
+
+/*
+体育课
+*/
+void lesson_physical_education(int,int)
+{
+	vector<string> msg;
+	
+	msg.push_back("今天是体育课");
+	
+	int delta_E;
+	int delta_H;
+	
+	if(energy_value >= 60)
+	{
+		delta_E = -10;
+		delta_H = rnd(1,3);
+		msg.push_back("你的状态很好");
+		msg.push_back("运动让你心情舒畅");
+	}
+	else if(energy_value >= 40)
+	{
+		delta_E = -9;
+		delta_H = rnd(0,2);
+		msg.push_back("你的状态不错");
+		if(delta_H > 0)
+			msg.push_back("运动让你心情舒畅");
+	}
+	else if(energy_value >= 20)
+	{
+		delta_E = -8;
+		delta_H = rnd(-1, 1);
+		
+		msg.push_back("你感觉有点疲劳");
+		if(delta_H < 0)
+			msg.push_back("这影响了你的心态");
+		if(delta_H > 0)
+			msg.push_back("但是运动让你心情舒畅");
+	}
+	else if(energy_value >= 8)
+	{
+		delta_E = -7;
+		delta_H = rnd(-1, 0);
+		
+		msg.push_back("你感觉很累");
+		if(delta_H < 0)
+			msg.push_back("这影响了你的心态");
+	}
+	else
+	{
+		delta_E = energy_value - 1;
+		delta_H = -10;
+		
+		msg.push_back("你力竭了，体育老师让你休息一会");
+		msg.push_back("你的心情很差");
+	}
+	
+	update_energe_value(delta_E);
+	update_hope_value(delta_H);
+	
+	display(msg, {
+		"确定"
+	});
+	
+	check_alive();
+}
+
+/*
+结局
+*/
+void ending(void)
+{
+	vector<string> msg, opt;
+	
+	msg.push_back("你顺利毕业了");
+	msg.push_back("接下来干什么呢？");
+	
+	opt.push_back("找工作");
+	opt.push_back("做科研");
+	opt.push_back("当游戏主播");
+	opt.push_back("成为音乐家");
+	opt.push_back("成为公务员");
+	if(energy_value_lim >= 200)
+		opt.push_back("成为运动员");
+	
+	int t = display(msg, opt);
+	
+	if(t == 0)
+	{
+		display_win({
+			"你找到了一份工作",
+			"你的人生平凡而幸福"
+		});
+	}
+	else if(t == 1)
+	{
+		if(paper_count >= 3)
+		{
+			display_win({
+				"你选择做科研",
+				"由于你在大学发表了多篇论文，你成为了学界大牛"
+			});
+		}
+		else if(paper_count >= 1)
+		{
+			display_win({
+				"你选择做科研",
+				"由于你在大学写论文的基础，你的科研非常顺利"
+			});
+		}
+		else
+		{
+			display_win({
+				"你选择做科研",
+				"你成为了一名科研工作者，忙碌而幸福"
+			});
+		}
+	}
+	else if(t == 2)
+	{
+		if(game_value >= 60)
+		{
+			display_win({
+				"你成为了一名游戏主播",
+				"因为你的游戏天赋，很快获得了成功"
+			});
+		}
+		else
+		{
+			display_win({
+				"你成为了一名游戏主播",
+				"虽然名气不大，但也能养家糊口"
+			});
+		}
+	}
+	else if(t == 3)
+	{
+		if(game_value >= 60)
+		{
+			display_win({
+				"你成为了一名音乐家",
+				"因为你的音乐天赋，很快获得了成功"
+			});
+		}
+		else
+		{
+			display_win({
+				"你成为了一名音乐家",
+				"虽然名气不大，但也能养家糊口"
+			});
+		}
+	}
+	else if(t == 4)
+	{
+		if(society_value >= 100)
+		{
+			display_win({
+				"你决定成为公务员，投身祖国建设",
+				"由于大学时期的积累，你做出了杰出的贡献"
+			});
+		}
+		else
+		{
+			display_win({
+				"你决定成为公务员，投身祖国建设",
+				"你的未来忙碌而幸福"
+			});
+		}
+	}
+} 
 
 int main(void)
 {
@@ -958,14 +1248,20 @@ int main(void)
 		{
 			lesson_development(week_id, weekday_id);
 		}
+		else if(weekday_id == 5)
+		{
+			lesson_physical_education(week_id, weekday_id);
+		}
 		else if(exam_set.count(week_id) && weekday_id == 7)
 		{
-			
+			lesson_calculus_exam(week_id, weekday_id);
 		}
 		else
 		{
 			lesson_no_lesson(week_id, weekday_id);
 		}
 	}
+	
+	ending();
 	return 0;
 }
