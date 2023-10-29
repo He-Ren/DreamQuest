@@ -611,6 +611,13 @@ void action_attend_concert(Lesson_id)
 */
 void lesson_calculus(int week_id, int weekday_id)
 {
+	/* for test
+	homework_finished = homework_tot;
+	update_hope_value(1000);
+	update_energe_value(1000);
+	calculus_value += 3;
+	*/
+	
 	if(current_date == homework_ddl && homework_finished != homework_tot)
 	{
 		calculus_value = max(0, calculus_value - 20);
@@ -1123,7 +1130,7 @@ void guide(void)
 			
 			cout << "游戏内容完全虚构，如有雷同，纯属巧合。" << endl;
 			
-			cout << "游戏过程中请不要调整窗口长宽比或者滚动窗口，否则可能造成显示问题。" << endl;
+			cout << "游戏过程中请不要调整窗口大小或者滚动窗口，否则可能造成显示问题。" << endl;
 			cout << "作者技术力有限，如有字体等问题，我们深感抱歉。" << endl;
 			
 			cout << endl;
@@ -1188,8 +1195,7 @@ void guide(void)
 		"本游戏中，大学生活有30周",
 		"这是你的课表：",
 		"|  周一  | 周二 |  周三  | 周四 | 周五 | 周六 | 周日 |",
-		"| 微积分 | 思政 | 微积分 |      | 体育 |      |      |"
-		"",
+		"| 微积分 | 思政 | 微积分 |      | 体育 |      |      |",
 		"注：思政表示思想道德与法治"
 	});
 	
