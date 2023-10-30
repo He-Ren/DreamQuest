@@ -261,6 +261,8 @@ void display_quit(void)
 ┷
 */
 
+int uflush_count = 0;
+
 void display_basic0(vector<string> s, vector<string> msg, vector<string> opt, int curopt)
 {
 	auto key = get_key_coord(s);
@@ -418,6 +420,13 @@ void display_basic0(vector<string> s, vector<string> msg, vector<string> opt, in
 		curx += 1;
 	}
 	
+	
+	++uflush_count;
+	if(uflush_count == 10)
+	{
+		uflush_count = 0;
+		system("cls");
+	}
 	
 	// system("cls");
 	// clrscr();
