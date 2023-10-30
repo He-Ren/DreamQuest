@@ -894,7 +894,7 @@ void lesson_development(int week_id, int weekday_id)
 			society_value += delta_S;
 			
 			bool lvl_up = 0;
-			while(society_value_lvl >= society_value_lvl_next)
+			while(society_value >= society_value_lvl_next)
 			{
 				lvl_up = 1;
 				++society_value_lvl;
@@ -1060,6 +1060,7 @@ void guide(void)
 			system("cls");
 			
 			cout << "DreamQuest - by 德法34组" << endl;
+			cout << "制作人： He_Ren" << endl;
 			cout << endl;
 			
 			cout << "游戏内容完全虚构，如有雷同，纯属巧合。" << endl;
