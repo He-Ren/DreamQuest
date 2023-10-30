@@ -26,6 +26,12 @@ void update_calculus_value(int delta)
 	calculus_value = max(0, calculus_value + delta);
 }
 
+void update_idea_count(int k = 1)
+{
+	idea_count += k;
+	idea_tot += max(k,0);
+}
+
 map<string,int> paper_name_count;
 
 vector<string> ImpressiveFoodName = {
@@ -93,64 +99,80 @@ void action_do_calculus_homework(Lesson_id curlesson)
 		else
 			msg.emplace_back("当前没有微积分作业，于是你决定在课上睡觉");
 		
-		int delta;
-		if(curlesson != Development)
-			delta = rnd(-2, 2);
-		else
-			delta = 2;
-		
-		energy_value = min(energy_value_lim, energy_value + 25);
-		hope_value = min(hope_value_lim, max(0, hope_value + delta));
+		int delta_E, delta_H;
 		
 		msg.push_back("你的体力恢复了不少");
 		
-		if(delta < 0)
+		if(curlesson != Development)
 		{
-			msg.emplace_back("没有事可干，你对未来充满迷茫");
+			delta_E = 15;
+			delta_H = -2;
+			msg.emplace_back("你感到迷茫");
 		}
-		if(delta > 0)
+		else
 		{
-			if(curlesson != Development)
-				msg.emplace_back("休闲的时光让你感到享受");
-			else
-				msg.emplace_back("深邃的思想浸入你的梦境，你对未来充满希望");
+			delta_E = 20;
+			delta_H = 2;
+			msg.emplace_back("思政给你力量，你感到充满希望");
 		}
+		
+		update_hope_value(delta_H);
+		update_energe_value(delta_E);
 	}
 	else
 	{
 		int num;
 		if(curlesson != Development)
-			num = rnd(10, 15 + energy_value / 15);
+		{
+			msg.push_back("体力值加成：" + to_string(energy_value / 15));
+			msg.push_back("能力值加成：" + to_string(calculus_value / 5));
+			num = energy_value / 15 + calculus_value / 5 + rnd(10, 15);
+		}
 		else
-			num = rnd(15, 15 + energy_value / 15);
+		{
+			msg.push_back("体力值加成：" + to_string(energy_value / 15));
+			msg.push_back("能力值加成：" + to_string(calculus_value / 5));
+			num = energy_value / 15 + calculus_value / 5 + 5;
+		}
 		
 		num = min(num, homework_tot - homework_finished);
 		
+		int delta_E;
 		int delta_H;
-		if(curlesson != Development)
-			delta_H = rnd(-2, 2);
-		else
-			delta_H = 2;
 		
-		int delta_C = num / 15 + rnd(0,1);
+		if(curlesson != Development)
+		{
+			if(homework_finished + num != homework_tot)
+				msg.push_back("你做了 " + to_string(num) + " 道题");
+			else
+				msg.push_back("你做了 " + to_string(num) + " 道题，完成了作业");
+			delta_E = -5;
+			delta_H = -2;
+		}
+		else
+		{
+			if(homework_finished + num != homework_tot)
+			{
+				msg.push_back("课上做作业影响了效率");
+				msg.push_back("你做了 " + to_string(num) + " 道题");
+			}
+			else
+			{
+				msg.push_back("你做了 " + to_string(num) + " 道题，完成了作业");
+			}
+			msg.push_back("思政课深邃的思想让你充满希望");
+			delta_E = -5;
+			delta_H = 3;
+		}
+		
+		int delta_C = num / 20;
+		if(delta_C > 0)
+			msg.push_back("你的微积分能力值提升了！");
 		
 		homework_finished += num;
-		energy_value = max(0, energy_value - 5);
-		hope_value = max(0, min(hope_value_lim, hope_value + delta_H));
-		calculus_value = calculus_value + delta_C;
-		
-		if(curlesson != Development)
-			msg.push_back("你做了 " + to_string(num) + " 道题");
-		else
-			msg.push_back("深邃的思想给你动力，你做了 " + to_string(num) + " 道题");
-		
-		if(delta_C > 0)
-			msg.push_back("你的微积分能力值提升了");
-		
-		if(delta_H < 0)
-			msg.push_back("做不完的作业让你对未来感到迷茫");
-		if(delta_H > 0)
-			msg.push_back("作业让你感到充实，你对未来充满希望");
+		update_hope_value(delta_H);
+		update_energe_value(delta_E);
+		update_calculus_value(delta_C);
 	}
 	
 	display(msg, {
@@ -167,67 +189,33 @@ void action_review_calculus(Lesson_id curlesson)
 {
 	vector<string> msg;
 	
-	int delta_C, delta_H;
+	msg.push_back("你复习了微积分");
+	
+	int delta_E;
+	int delta_H;
+	int delta_C;
 	
 	if(curlesson != Development)
 	{
-		if(rndbool(0.05))
-		{
-			delta_C = 3;
-			delta_H = 2;
-		}
-		else
-		{
-			if(rndbool(0.1))
-				delta_C = 2;
-			else
-				delta_C = 1;
-			
-			delta_H = rnd(-1,1);
-		}
+		delta_E = -5;
+		delta_H = -2;
+		delta_C = rnd(1,2);
+		if(delta_C == 2)
+			msg.push_back("你今天效率很高");
 	}
 	else
 	{
-		if(rndbool(0.1))
-		{
-			delta_C = 3;
-			delta_H = 2;
-		}
-		else
-		{
-			delta_C = rnd(1,2);
-			delta_H = rnd(0,1);
-		}
+		msg.push_back("课上做复习影响了效率");
+		msg.push_back("但是思政课深邃的思想让你充满希望");
+		delta_E = -5;
+		delta_H = 3;
+		delta_C = 1;
 	}
 	
-	msg.push_back("你决定复习微积分");
-	
-	if(curlesson == Development)
-		msg.push_back("深邃的思想给了你帮助");
-	
-	if(delta_C == 3)
-	{
-		if(curlesson != Development)
-			msg.push_back("你的状态非常好");
-		else
-			msg.push_back("你的状态非常好");
-	}
-	else if(delta_C == 2)
-	{
-		if(curlesson != Development)
-			msg.push_back("你的状态不错");
-		else
-			msg.push_back("你的状态不错");
-	}
-	
-	if(delta_H > 0)
-		msg.push_back("微积分的巧妙让你对未来充满希望");
-	if(delta_H < 0)
-		msg.push_back("微积分的困难让你感到迷茫");
-	
-	update_energe_value(-5);
 	update_hope_value(delta_H);
+	update_energe_value(delta_E);
 	update_calculus_value(delta_C);
+	
 	
 	display(msg, {
 		"确定"
@@ -239,51 +227,36 @@ void action_review_calculus(Lesson_id curlesson)
 /*
 读论文
 */
-void action_read_paper(Lesson_id curlesson)
+void action_read_paper(Lesson_id)
 {
 	vector<string> msg;
 	
 	int delta_H;
+	int delta_E = -5;
 	
 	string paper_name = rand_paper_name();
 	msg.push_back("你找到了一篇论文，《"  + paper_name + "》");
 	
-	double prob;
-	if(curlesson != Development)
-		prob = ((double)hope_value / hope_value_lim * 5 + (double)energy_value / energy_value_lim * 5) / 100;
-	else
-		prob = ((double)hope_value / hope_value_lim * 10 + (double)energy_value / energy_value_lim * 5) / 100;
+	double prob = 0;
+	prob += (double)hope_value / hope_value_lim * 5;
+	prob += (double)energy_value / energy_value_lim * 5;
+	prob += max(0, 90 - idea_tot * 20);
+	prob /= 100;
 	
 	if(rndbool(prob))
 	{
-		++idea_count;
+		update_idea_count();
 		
-		if(curlesson != Development)
-		{
-			msg.push_back("论文给了你启发，你产生了一个新的 idea！");
-			delta_H = 10;
-		}
-		else
-		{
-			msg.push_back("在思政课深邃思想的启示下，你产生了一个新的 idea！");
-			delta_H = 10;
-		}
+		msg.push_back("论文给了你启发，你产生了一个新的 idea！");
+		delta_H = 10;
 	}
 	else
 	{
-		if(curlesson != Development)
-		{
-			msg.push_back("你对未来充满希望");
-			delta_H = 2;
-		}
-		else
-		{
-			msg.push_back("你对未来充满希望");
-			delta_H = 2;
-		}
+		msg.push_back("你对未来充满希望");
+		delta_H = 2;
 	}
 	
-	update_energe_value(-5);
+	update_energe_value(delta_E);
 	update_hope_value(delta_H);
 	
 	display(msg, {
@@ -328,7 +301,7 @@ void action_write_paper(Lesson_id )
 		delta_H = - max(5, min(20, hope_value - 5));
 	}
 	
-	idea_count -= 3;
+	update_idea_count(-3);
 	update_energe_value(-5);
 	update_hope_value(delta_H);
 	
@@ -351,28 +324,25 @@ void action_do_nothing(Lesson_id curlesson)
 	else
 		msg.emplace_back("你决定在课上睡觉");
 	
-	int delta;
-	if(curlesson != Development)
-		delta = rnd(-2, 2);
-	else
-		delta = 2;
-	
-	energy_value = min(energy_value_lim, energy_value + 25);
-	hope_value = min(hope_value_lim, max(0, hope_value + delta));
+	int delta_E, delta_H;
 	
 	msg.push_back("你的体力恢复了不少");
 	
-	if(delta < 0)
+	if(curlesson != Development)
 	{
-		msg.emplace_back("没有事可干，你对未来充满迷茫");
+		delta_E = 15;
+		delta_H = -2;
+		msg.emplace_back("你感到迷茫");
 	}
-	if(delta > 0)
+	else
 	{
-		if(curlesson != Development)
-			msg.emplace_back("休闲的时光让你感到享受");
-		else
-			msg.emplace_back("深邃的思想浸入你的梦境，你对未来充满希望");
+		delta_E = 20;
+		delta_H = 2;
+		msg.emplace_back("思政给你力量，你感到充满希望");
 	}
+		
+	update_hope_value(delta_H);
+	update_energe_value(delta_E);
 	
 	display(msg, {
 		"确定"
@@ -395,6 +365,7 @@ void action_do_sport(Lesson_id)
 	
 	energy_value_lim += 5;
 	update_energe_value(-5);
+	update_hope_value(-2);
 	
 	display(msg, {
 		"确定"
@@ -410,11 +381,11 @@ void action_play_game(Lesson_id)
 {
 	vector<string> msg;
 	
-	int delta_E = rnd(10, 20);
-	int delta_H = rnd(-3, 2);
+	int delta_E = 10 + game_value_lvl * 5;
+	int delta_H = -10;
 	int delta_G = rnd(1,2);
 	
-	if(rndbool(0.05))
+	if(rndbool(0.1))
 	{
 		msg.push_back("__ __，启动！");
 	}
@@ -423,22 +394,27 @@ void action_play_game(Lesson_id)
 		msg.push_back("你玩了一会游戏");
 	}
 	
+	msg.push_back("游戏等级对体力值加成：" + to_string(game_value_lvl * 5));
+	
 	if(delta_G == 2)
 		msg.push_back("今天手感很好");
-	
-	if(delta_E <= 15)
-		msg.push_back("你的体能恢复了");
-	else
-		msg.push_back("你的体能恢复了很多");
-	
-	if(delta_H < 0)
-		msg.push_back("这样的生活让你对未来感到迷茫");
-	if(delta_H > 0)
-		msg.push_back("游戏让你心情大好");
 	
 	update_energe_value(delta_E);
 	update_hope_value(delta_H);
 	game_value += delta_G;
+	
+	bool lvl_up = 0;
+	while(game_value >= game_value_lvl_next)
+	{
+		lvl_up = 1;
+		++game_value_lvl;
+		game_value_lvl_next = 2 * (game_value_lvl + 1) * (game_value_lvl + 1);
+	}
+	
+	if(lvl_up)
+		msg.push_back("你的游戏等级提升了！");
+	
+	msg.push_back("你感到迷茫");
 	
 	display(msg, {
 		"确定"
@@ -454,28 +430,33 @@ void action_practice_music(Lesson_id)
 {
 	vector<string> msg;
 	
-	int delta_E = rnd(10, 20);
-	int delta_H = rnd(-2, 2);
+	int delta_E = -3;
+	int delta_H = 1 + music_value_lvl * 2;
 	int delta_M = rnd(1,2);
 	
 	msg.push_back("你练了一会琴");
 	
+	msg.push_back("音乐等级对希望值加成：" + to_string(music_value_lvl * 2));
+	
 	if(delta_M == 2)
 		msg.push_back("今天手感很好");
 	
-	if(delta_E <= 15)
-		msg.push_back("你的体能恢复了");
-	else
-		msg.push_back("你的体能恢复了很多");
-	
-	if(delta_H < 0)
-		msg.push_back("你对未来感到迷茫");
-	if(delta_H > 0)
-		msg.push_back("琴声让你心情舒畅");
+	msg.push_back("琴声让你心情舒畅");
 	
 	update_energe_value(delta_E);
 	update_hope_value(delta_H);
 	music_value += delta_M;
+	
+	bool lvl_up = 0;
+	while(music_value >= music_value_lvl_next)
+	{
+		lvl_up = 1;
+		++music_value_lvl;
+		music_value_lvl_next = 2 * (music_value_lvl + 1) * (music_value_lvl + 1);
+	}
+	
+	if(lvl_up)
+		msg.push_back("你的音乐等级提升了！");
 	
 	display(msg, {
 		"确定"
@@ -491,28 +472,34 @@ void action_read_news(Lesson_id)
 {
 	vector<string> msg;
 	
-	int delta_E = rnd(10, 20);
-	int delta_H = rnd(-2, 2);
-	int delta_S = rnd(1,2);
+	int delta_E = -2;
+	int delta_H = rnd(-2, 4);
+	int delta_S = 1;
 	
 	msg.push_back("你读了一些新闻");
 	
-	if(delta_S == 2)
-		msg.push_back("你对社会现状有了一些思考");
-	
-	if(delta_E <= 15)
-		msg.push_back("你的体能恢复了");
-	else
-		msg.push_back("你的体能恢复了很多");
-	
 	if(delta_H < 0)
-		msg.push_back("你对未来感到迷茫");
+		msg.push_back("负能量的新闻影响了你的心情");
 	if(delta_H > 0)
-		msg.push_back("你充满决心");
+		msg.push_back("正能量的新闻让你充满希望");
 	
 	update_energe_value(delta_E);
 	update_hope_value(delta_H);
 	society_value += delta_S;
+	
+	bool lvl_up = 0;
+	while(society_value >= society_value_lvl_next)
+	{
+		lvl_up = 1;
+		++society_value_lvl;
+		society_value_lvl_next = 2 * (society_value_lvl + 1) * (society_value_lvl + 1);
+	}
+	
+	if(lvl_up)
+	{
+		msg.push_back("你的社交等级提升了！");
+		msg.push_back("tips: 社交等级可以增加日常出现活动的概率");
+	}
 	
 	display(msg, {
 		"确定"
@@ -522,23 +509,20 @@ void action_read_news(Lesson_id)
 }
 
 /*
-参加社工活动
+参加社交活动
 */
 void action_do_social_activities(Lesson_id)
 {
 	vector<string> msg;
 	
-	int delta_E = -2;
-	int delta_H = 5;
-	int delta_S = 5;
+	int delta_E = -5;
+	int delta_H = 8;
 	
-	msg.push_back("你参加了一些社工活动");
-	
+	msg.push_back("你参加了活动");
 	msg.push_back("你对未来充满希望");
 	
 	update_energe_value(delta_E);
 	update_hope_value(delta_H);
-	society_value += delta_S;
 	
 	display(msg, {
 		"确定"
@@ -554,7 +538,7 @@ void action_attend_math_lecture(Lesson_id)
 {
 	vector<string> msg;
 	
-	int delta_E = -2;
+	int delta_E = -5;
 	int delta_H = 5;
 	int delta_C = 3;
 	
@@ -562,7 +546,7 @@ void action_attend_math_lecture(Lesson_id)
 	
 	if(rndbool(0.5))
 	{
-		idea_count += 1;
+		update_idea_count();
 		delta_H += 10;
 		msg.push_back("讲座给了你启发，你产生了一个新的 idea！");
 	}
@@ -587,9 +571,9 @@ void action_attend_concert(Lesson_id)
 {
 	vector<string> msg;
 	
-	int delta_E = -2;
+	int delta_E = 2;
 	int delta_H = 5;
-	int delta_M = 3;
+	int delta_M = 5;
 	
 	msg.push_back("你参加了一场音乐会");
 	
@@ -606,30 +590,167 @@ void action_attend_concert(Lesson_id)
 	check_alive();
 }
 
+
+bool decide_do_nothing(Lesson_id curlesson, vector<string> msg, int /*week_id*/, int weekday_id)
+{
+	vector<string> opt;
+	vector<int> opt_id;
+	
+	auto push = [&] (int id, string s)
+	{
+		opt.push_back(s);
+		opt_id.push_back(id);
+	};
+	
+	push(0, "做微积分作业");
+	push(1, "复习微积分");
+	push(2, "读论文");
+	
+	if(curlesson != Development)
+	{
+		push(3, "运动");
+		push(4, "打游戏");
+		push(5, "练琴");
+		push(6, "阅读一些时政新闻");
+		push(7, "休息一天");
+	}
+	else
+	{
+		push(7, "睡觉");
+	}
+	
+	if(idea_count >= 3)
+		push(8, "花3个idea写篇论文");
+	
+	if(curlesson == Nolesson)
+	{
+		double prob = min(100, 5 + society_value_lvl * 2);
+		prob /= 100;
+		if(rndbool(prob))
+		{
+			int oth = rnd(0, 100 - 1);
+			
+			if(0 <= oth && oth < 70)
+			{
+				if(weekday_id == 6 || weekday_id == 7)
+				{
+					msg.push_back("群公告：今天有团建活动，大家自愿参加");
+					push(9, "参加团建活动");
+				}
+				else
+				{
+					msg.push_back("群公告：今天有社工活动，大家自愿参加");
+					push(9, "参加社工活动");
+				}
+			}
+			else if(70 <= oth && oth < 85)
+			{
+				msg.push_back("群公告：今天有数学讲座，大家自愿参加");
+				push(10, "参加数学讲座");
+			}
+			else if(70 <= oth && oth < 85)
+			{
+				msg.push_back("群公告：今天有音乐会，大家自愿参加");
+				push(11, "参加音乐会");
+			}
+		}
+	}
+	
+	if(curlesson == Calculus || curlesson == Development)
+	{
+		push(12, "返回上一页");
+	}
+	
+	int t = display(msg, opt);
+	
+	if(opt_id[t] == 0)// 做微积分作业
+	{
+		action_do_calculus_homework(curlesson);
+	}
+	else if(opt_id[t] == 1)// 复习微积分
+	{
+		action_review_calculus(curlesson);
+	}
+	else if(opt_id[t] == 2)// 读论文
+	{
+		action_read_paper(curlesson);
+	}
+	else if(opt_id[t] == 3)// 运动
+	{
+		action_do_sport(curlesson);
+	}
+	else if(opt_id[t] == 4)// 打游戏
+	{
+		action_play_game(curlesson);
+	}
+	else if(opt_id[t] == 5)// 练琴
+	{
+		action_practice_music(curlesson);
+	}
+	else if(opt_id[t] == 6)// 阅读一些时政新闻
+	{
+		action_read_news(curlesson);
+	}
+	else if(opt_id[t] == 7)// 休息一天
+	{
+		action_do_nothing(curlesson);
+	}
+	else if(opt_id[t] == 8)// 花3个idea写篇论文
+	{
+		action_write_paper(curlesson);
+	}
+	else if(opt_id[t] == 9)// 参加活动
+	{
+		action_do_social_activities(curlesson);
+	}
+	else if(opt_id[t] == 10)// 参加数学讲座
+	{
+		action_attend_math_lecture(curlesson);
+	}
+	else if(opt_id[t] == 11)// 参加音乐会
+	{
+		action_attend_concert(curlesson);
+	}
+	else if(opt_id[t] == 12)
+	{
+		return 0;
+	}
+	
+	check_alive();
+	
+	return 1;
+}
+
 /*
 微积分课
 */
 void lesson_calculus(int week_id, int weekday_id)
 {
-	/* for test
-	homework_finished = homework_tot;
-	update_hope_value(1000);
-	update_energe_value(1000);
-	calculus_value += 3;
-	*/
-	
 	if(current_date == homework_ddl && homework_finished != homework_tot)
 	{
-		calculus_value = max(0, calculus_value - 20);
-		hope_value = max(0, hope_value - 20);
+		update_hope_value(-30);
 		homework_failed_count += 1;
 		
-		display({
+		vector<string> msg = {
 			"今天是微积分课",
 			"但是你的微积分作业没有完成",
-			"微积分能力值减20",
-			"你对生活失去希望，希望值减20"
-		},{
+			"你非常郁闷，希望值减30"
+		};
+		
+		if(homework_failed_count < 3)
+		{
+			msg.push_back("这是你的第"
+				+ to_string(homework_failed_count)
+				+ "次逾期，3次逾期将被劝退");
+		}
+		else
+		{
+			msg.push_back("这是你的第"
+				+ to_string(homework_failed_count)
+				+ "次逾期");
+		}
+		
+		display(msg,{
 			"确定"
 		});
 		
@@ -643,7 +764,7 @@ void lesson_calculus(int week_id, int weekday_id)
 		if(homework_failed_count >= 3)
 		{
 			display_lose({
-				"由于你三次没有完成作业，这门课不及格，学校为你安排了劝退"
+				"由于你3次没有完成作业，这门课不及格，被劝退"
 			});
 		}
 	}
@@ -660,11 +781,11 @@ void lesson_calculus(int week_id, int weekday_id)
 			msg.push_back("教授说，这周是考试周，就不布置作业了");
 			homework_tot = 0;
 			homework_finished = 0;
-			homework_ddl = current_date + 7;
+			homework_ddl = -1;
 		}
 		else
 		{
-			int t = rnd(20, 50);
+			int t = rnd2(20 + 2 * week_id, 40 + 2 * week_id);
 			msg.push_back("这周的作业有 " + to_string(t) + " 道题");
 			homework_tot = t;
 			homework_finished = 0;
@@ -694,7 +815,11 @@ void lesson_calculus(int week_id, int weekday_id)
 		
 		if(t == 0)
 		{
-			energy_value = max(0, energy_value - 5);
+			int delta_E = -7;
+			int delta_H = -3;
+			
+			update_energe_value(delta_E);
+			update_hope_value(delta_H);
 			
 			if(energy_value <= 0)
 			{
@@ -705,83 +830,23 @@ void lesson_calculus(int week_id, int weekday_id)
 			}
 			
 			vector<string> msg2;
-			if(rndbool(0.3))
-			{
-				msg2.push_back("你听得很投入");
-				calculus_value += 2;
-			}
-			else
-			{
-				msg2.push_back("你听了课");
-				calculus_value += 1;
-			}
 			
-			if(rndbool(0.05))
-			{
-				msg2.push_back("微积分给了你启发，你产生了一个新 idea！");
-				hope_value = min(hope_value_lim, hope_value + 10);
-				idea_count += 1;
-			}
+			msg2.push_back("你听了课");
+			calculus_value += 3;
 			
 			display(msg2, {"确定"});
+			
+			check_alive();
 		}
 		else
 		{
-			vector<string> opt2;
-			opt2.push_back("做微积分作业");
-			opt2.push_back("复习微积分");
-			opt2.push_back("读论文");
-			opt2.push_back("运动");
-			opt2.push_back("打游戏");
-			opt2.push_back("练琴");
-			opt2.push_back("阅读一些时政新闻");
-			opt2.push_back("休息一天");
-			if(idea_count >= 3)
-				opt2.push_back("花3个idea写篇论文");
-			opt2.push_back("返回上一页");
+			bool flag = decide_do_nothing(Calculus, {
+				"干点什么呢？"
+			}, week_id, weekday_id);
 			
-			int t2 = display({"你决定要翘课，但是干点啥呢？"}, opt2);
-			
-			if(t2 == (int)opt2.size() - 1)
+			if(flag == 0)
 			{
 				continue;
-			}
-			
-			if(t2 == 0)// 做微积分作业
-			{
-				action_do_calculus_homework(Calculus);
-			}
-			else if(t2 == 1)// 复习微积分
-			{
-				action_review_calculus(Calculus);
-			}
-			else if(t2 == 2)// 读论文
-			{
-				action_read_paper(Calculus);
-			}
-			else if(t2 == 3)// 运动
-			{
-				action_do_sport(Calculus);
-			}
-			else if(t2 == 4)// 打游戏
-			{
-				action_play_game(Calculus);
-			}
-			else if(t2 == 5)// 练琴
-			{
-				action_practice_music(Calculus);
-			}
-			else if(t2 == 6)// 阅读一些时政新闻
-			{
-				action_read_news(Calculus);
-			}
-			else if(t2 == 7)// 休息一天
-			{
-				action_do_nothing(Calculus);
-			}
-			else if(t2 == 8)// 花3个idea写篇论文
-			{
-				action_write_paper(Calculus);
 			}
 		}
 		
@@ -792,7 +857,7 @@ void lesson_calculus(int week_id, int weekday_id)
 /*
 思想道德与法治课
 */
-void lesson_development(int, int)
+void lesson_development(int week_id, int weekday_id)
 {
 	vector<string> msg;
 	
@@ -807,7 +872,12 @@ void lesson_development(int, int)
 		
 		if(t == 0)
 		{
-			energy_value = max(0, energy_value - 5);
+			int delta_E = -5;
+			int delta_H = 7;
+			int delta_S = 1;
+			
+			update_energe_value(delta_E);
+			update_hope_value(delta_H);
 			
 			if(energy_value <= 0)
 			{
@@ -817,11 +887,25 @@ void lesson_development(int, int)
 				});
 			}
 			
-			update_hope_value(7);
-			society_value += 2;
-			
 			vector<string> msg2;
-			msg2.push_back("思政深邃的思想让你对未来充满希望");
+			msg2.push_back("你听了课");
+			msg2.push_back("思政老师生动的讲解让你充满希望");
+			
+			society_value += delta_S;
+			
+			bool lvl_up = 0;
+			while(society_value_lvl >= society_value_lvl_next)
+			{
+				lvl_up = 1;
+				++society_value_lvl;
+				society_value_lvl_next = 2 * (society_value_lvl + 1) * (society_value_lvl + 1);
+			}
+			
+			if(lvl_up)
+			{
+				msg2.push_back("你的社交等级提升了！");
+				msg2.push_back("tips: 社交等级可以增加日常出现活动的概率");
+			}
 			
 			display(msg2, {"确定"});
 			
@@ -829,41 +913,13 @@ void lesson_development(int, int)
 		}
 		else
 		{
-			vector<string> opt2;
-			opt2.push_back("做微积分作业");
-			opt2.push_back("复习微积分");
-			opt2.push_back("读论文");
-			opt2.push_back("睡觉");
-			if(idea_count >= 3)
-				opt2.push_back("花3个idea写篇论文");
-			opt2.push_back("返回上一页");
+			bool flag = decide_do_nothing(Development, {
+				"干点啥呢？"
+			}, week_id, weekday_id);
 			
-			int t2 = display({"你决定要在课上干点别的，但是干点啥呢？"}, opt2);
-			
-			if(t2 == (int)opt2.size() - 1)
+			if(flag == 0)
 			{
 				continue;
-			}
-			
-			if(t2 == 0)// 做微积分作业
-			{
-				action_do_calculus_homework(Development);
-			}
-			else if(t2 == 1)// 复习微积分
-			{
-				action_review_calculus(Development);
-			}
-			else if(t2 == 2)// 读论文
-			{
-				action_read_paper(Development);
-			}
-			else if(t2 == 3)// 睡觉
-			{
-				action_do_nothing(Development);
-			}
-			else if(t2 == 4)// 花3个idea写篇论文
-			{
-				action_write_paper(Development);
 			}
 		}
 		
@@ -874,135 +930,13 @@ void lesson_development(int, int)
 /*
 平时
 */
-void lesson_no_lesson(int, int)
+void lesson_no_lesson(int week_id, int weekday_id)
 {
 	vector<string> msg;
 	
 	msg.push_back("今天没有课");
 	
-	vector<string> opt;
-	vector<int> opt_id;
-	
-	auto push = [&] (int id, string s)
-	{
-		opt.push_back(s);
-		opt_id.push_back(id);
-	};
-	
-	push(0, "做微积分作业");
-	push(1, "复习微积分");
-	push(2, "读论文");
-	push(3, "运动");
-	push(4, "打游戏");
-	push(5, "练琴");
-	push(6, "阅读一些时政新闻");
-	push(7, "休息一天");
-	if(idea_count >= 3)
-		push(8, "花3个idea写篇论文");
-	
-	int oth = rnd(0, 100 - 1);
-	if(0 <= oth && oth < 5)
-	{
-		msg.push_back("群公告：今天有社工活动，大家自愿参加");
-		push(9, "参加社工活动");
-	}
-	else if(5 <= oth && oth < 10)
-	{
-		msg.push_back("群公告：今天有数学讲座，大家自愿参加");
-		push(10, "参加数学讲座");
-	}
-	else if(10 <= oth && oth < 15)
-	{
-		msg.push_back("群公告：今天有音乐会，大家自愿参加");
-		push(11, "参加音乐会");
-	}
-	else if(15 <= oth && oth < 17 && game_value >= 60)
-	{
-		msg.push_back("某战队发现了你的游戏天赋，邀请你加入");
-		push(12, "接受游戏战队的邀请（结束游戏）");
-	}
-	else if(17 <= oth && oth < 19 && music_value >= 60)
-	{
-		msg.push_back("某星探发现了你的音乐才能，邀请你参加演出");
-		push(13, "接受星探的邀请（结束游戏）");
-	}
-	else if(19 <= oth && oth < 21 && energy_value_lim >= 200)
-	{
-		msg.push_back("校队发现了你的体育天赋，邀请你加入");
-		push(14, "接受校队的邀请（结束游戏）");
-	}
-	
-	int t = display(msg, opt);
-	
-	if(opt_id[t] == 0)// 做微积分作业
-	{
-		action_do_calculus_homework(Nolesson);
-	}
-	else if(opt_id[t] == 1)// 复习微积分
-	{
-		action_review_calculus(Nolesson);
-	}
-	else if(opt_id[t] == 2)// 读论文
-	{
-		action_read_paper(Nolesson);
-	}
-	else if(opt_id[t] == 3)// 运动
-	{
-		action_do_sport(Nolesson);
-	}
-	else if(opt_id[t] == 4)// 打游戏
-	{
-		action_play_game(Nolesson);
-	}
-	else if(opt_id[t] == 5)// 练琴
-	{
-		action_practice_music(Nolesson);
-	}
-	else if(opt_id[t] == 6)// 阅读一些时政新闻
-	{
-		action_read_news(Nolesson);
-	}
-	else if(opt_id[t] == 7)// 休息一天
-	{
-		action_do_nothing(Nolesson);
-	}
-	else if(opt_id[t] == 8)// 花3个idea写篇论文
-	{
-		action_write_paper(Nolesson);
-	}
-	else if(opt_id[t] == 9)// 参加社工活动
-	{
-		action_do_social_activities(Nolesson);
-	}
-	else if(opt_id[t] == 10)// 参加数学讲座
-	{
-		action_attend_math_lecture(Nolesson);
-	}
-	else if(opt_id[t] == 11)// 参加音乐会
-	{
-		action_attend_concert(Nolesson);
-	}
-	else if(opt_id[t] == 12)// 游戏天赋
-	{
-		display_win({
-			"你触发了隐藏结局！",
-			"你加入了战队，前途一片光明"
-		});
-	}
-	else if(opt_id[t] == 13)// 音乐天赋
-	{
-		display_win({
-			"你触发了隐藏结局！",
-			"你成为了音乐家，前途一片光明"
-		});
-	}
-	else if(opt_id[t] == 14)// 体育天赋
-	{
-		display_win({
-			"你触发了隐藏结局！",
-			"你加入了校队，前途一片光明"
-		});
-	}
+	decide_do_nothing(Nolesson, msg, week_id, weekday_id);
 }
 
 /*
@@ -1025,7 +959,7 @@ void lesson_calculus_exam(int,int)
 		});
 		
 		display_lose({
-			"你挂科了，学校为你安排了退学"
+			"你挂科了，学校将你劝退"
 		});
 	}
 	
@@ -1164,14 +1098,14 @@ void guide(void)
 		"同意",
 		"不反对",
 		"已知晓",
-	});
+	},0);
 	
 	int skipguide = display({
 		"跳过新手教程？"
 	},{
 		"否",
 		"是"
-	});
+	},0);
 	
 	if(skipguide == 1)
 	{
@@ -1179,11 +1113,11 @@ void guide(void)
 			"欢迎来到 DreamQuest，祝您游玩愉快！",
 		},{
 			"开始游戏",
-		});
+		},0);
 		return;
 	}
 	
-	int pageid = 0;
+	int pageid = 0, curopt = 0;
 	vector< vector<string> > all_pages;
 	
 	all_pages.push_back({
@@ -1202,28 +1136,35 @@ void guide(void)
 	all_pages.push_back({
 		"周一周三：微积分",
 		"微积分会有作业和考试",
-		"作业每周一布置，下周一截止，三次逾期会被劝退",
-		"考试有两次，分别在第15和30周的周日",
+		"微积分有属性“能力值”，上课、做作业、复习都会提高能力值",
 	});
 	
 	all_pages.push_back({
-		"看到下方的微积分能力值了吗？考试会有微积分能力值的要求，考试时达不到要求会被劝退",
-		"上课、做作业、复习都会提高能力值，但是作业逾期会有能力值的惩罚"
+		"微积分作业：",
+		"周一布置，考试周除外",
+		"能力值会增加做作业的效率",
+		"每次作业的ddl为下周一，请注意：逾期3次会被劝退！",
+	});
+	
+	all_pages.push_back({
+		"微积分考试：",
+		"共有两次考试，每次考试有对应的能力值要求",
+		"达不到要求会直接被劝退",
 	});
 	
 	all_pages.push_back({
 		"周二：思想道德与法治",
-		"这门课上干任何事情，对比平时都会有增益效果！"
+		"你可以选择上课摸鱼，去干一些平时的事情，但是效果略有不同"
 	});
 	
 	all_pages.push_back({
 		"周五：体育",
-		"体育课不能翘，并且会消耗体力值，请注意！"
+		"体育课不能翘，并且会消耗体力值"
 	});
 	
 	all_pages.push_back({
 		"没课时，你可以做各种活动",
-		"某些活动有隐藏的属性值，专精某一方面可以触发隐藏结局！"
+		"专精某一方面可以触发隐藏结局！"
 	});
 	
 	all_pages.push_back({
@@ -1231,7 +1172,28 @@ void guide(void)
 		"3个idea可以写一篇论文",
 		"idea和论文可以大幅提高希望值",
 		"注意，写论文有小概率失败，此时会大幅减少希望值",
-		"结束时有3篇及以上的论文会触发隐藏结局！"
+		"结束时有5篇及以上的论文会触发隐藏结局！"
+	});
+	
+	all_pages.push_back({
+		"运动可以提升体能上限"
+	});
+	
+	all_pages.push_back({
+		"游戏可以恢复体力，恢复的量和当前游戏等级有关",
+		"结束时达到8级会触发隐藏结局！"
+	});
+	
+	all_pages.push_back({
+		"练琴可以恢复体力，恢复的量和当前音乐等级有关",
+		"结束时达到8级会触发隐藏结局！"
+	});
+	
+	all_pages.push_back({
+		"社交等级可以通过读新闻和上思政课来提升",
+		"社交等级可以增加出现额外活动的概率，包括社工、团建、数学讲座、音乐会",
+		"这些活动往往有很大的增益！",
+		"结束时达到8级会触发隐藏结局！"
 	});
 	
 	all_pages.push_back({
@@ -1245,16 +1207,18 @@ void guide(void)
 			int t = display(all_pages[pageid], {
 				"开始游戏",
 				"上一页"
-			});
+			},0,curopt);
 			if(t == 0) break;
 			
+			curopt = t;
 			pageid -= 1;
 		}
 		else if(pageid == 0)
 		{
-			display(all_pages[pageid], {
+			int t = display(all_pages[pageid], {
 				"下一页"
-			});
+			},0,0);
+			curopt = t;
 			++pageid;
 		}
 		else
@@ -1262,7 +1226,8 @@ void guide(void)
 			int t = display(all_pages[pageid], {
 				"下一页",
 				"上一页"
-			});
+			},0,curopt);
+			curopt = t;
 			if(t == 0) ++pageid;
 			else --pageid;
 		}
@@ -1283,92 +1248,102 @@ void ending(void)
 	opt.push_back("做科研");
 	opt.push_back("当游戏主播");
 	opt.push_back("成为音乐家");
-	opt.push_back("成为公务员");
-	if(energy_value_lim >= 200)
-		opt.push_back("成为运动员");
 	
 	int t = display(msg, opt);
 	
 	if(t == 0)
 	{
-		display_win({
-			"你找到了一份工作",
-			"你的人生平凡而幸福"
-		});
-	}
-	else if(t == 1)
-	{
-		if(paper_count >= 3)
+		if(society_value_lvl < 5)
 		{
-			display_win({
-				"你触发了隐藏结局！",
-				"你选择做科研",
-				"由于你在大学发表了多篇论文，你成为了学界大牛"
+			display_normal({
+				"你找到了一份工作",
+				"你的人生平凡而幸福",
 			});
 		}
-		else if(paper_count >= 1)
+		else if(society_value_lvl < 8)
 		{
-			display_win({
-				"你选择做科研",
-				"由于你在大学写论文的基础，你的科研非常顺利"
+			display_good({
+				"你找到了一份工作",
+				"由于你社交能力的积累，你生活富裕的同时为社会做出了贡献",
 			});
 		}
 		else
 		{
-			display_win({
+			display_perfect({
+				"你找到了一份工作",
+				"由于你出色的社交能力，你在工作的领域做到了顶端，为社会做出了很大贡献",
+			});
+		}
+	}
+	else if(t == 1)
+	{
+		if(paper_count < 1)
+		{
+			display_normal({
 				"你选择做科研",
-				"你成为了一名科研工作者，忙碌而幸福"
+				"你为科学而奋斗，平凡而幸福"
+			});
+		}
+		else if(paper_count < 4)
+		{
+			display_good({
+				"你选择做科研",
+				"由于你在大学科研的基础，你小有成就"
+			});
+		}
+		else
+		{
+			display_perfect({
+				"你选择做科研",
+				"由于你出色的科研能力，你成为了领域内的大牛"
 			});
 		}
 	}
 	else if(t == 2)
 	{
-		if(game_value >= 60)
+		if(game_value_lvl < 5)
 		{
-			display_win({
+			display_normal({
 				"你成为了一名游戏主播",
-				"因为你的游戏天赋，很快获得了成功"
+				"虽然名气不大，但能养家糊口，你的人生平凡而幸福"
+			});
+		}
+		else if(game_value_lvl < 8)
+		{
+			display_good({
+				"你成为了一名游戏主播",
+				"由于你的游戏实力，成为了大主播"
 			});
 		}
 		else
 		{
-			display_win({
+			display_perfect({
 				"你成为了一名游戏主播",
-				"虽然名气不大，但也能养家糊口"
+				"由于你出色的游戏实力，你进入了战队，赢得了荣誉"
 			});
 		}
 	}
 	else if(t == 3)
 	{
-		if(game_value >= 60)
+		if(music_value_lvl < 5)
 		{
-			display_win({
+			display_normal({
 				"你成为了一名音乐家",
-				"因为你的音乐天赋，很快获得了成功"
+				"你四处演出，虽然名气不大，但能养家糊口，你的人生平凡而幸福"
+			});
+		}
+		else if(music_value_lvl < 8)
+		{
+			display_good({
+				"你成为了一名音乐家",
+				"由于你大学的积累，你小有名气"
 			});
 		}
 		else
 		{
-			display_win({
+			display_perfect({
 				"你成为了一名音乐家",
-				"虽然名气不大，但也能养家糊口"
-			});
-		}
-	}
-	else if(t == 4)
-	{
-		if(society_value >= 100)
-		{
-			display_win({
-				"你决定成为公务员，投身祖国建设",
-				"由于大学时期的积累，你做出了杰出的贡献"
-			});
-		}
-		else
-		{
-			display_win({
-				"你决定成为公务员，投身祖国建设",
-				"你的未来忙碌而幸福"
+				"由于你刻苦的练习，你名声大噪，成为了知名音乐家"
 			});
 		}
 	}
@@ -1386,11 +1361,20 @@ int main(void)
 	
 	calculus_value = 0;
 	idea_count = 0;
+	idea_tot = 0;
 	paper_count = 0;
 	
 	game_value = 0;
+	game_value_lvl = 0;
+	game_value_lvl_next = 2;
+	
 	music_value = 0;
+	music_value_lvl = 0;
+	music_value_lvl_next = 2;
+	
 	society_value = 0;
+	society_value_lvl = 0;
+	society_value_lvl_next = 2;
 	
 	next_exam_date = -1;
 	next_exam_require = -1;

@@ -37,10 +37,21 @@ int get_utf8_len(char c)
 
 int get_utf8_width(const char *c)
 {
-	if((unsigned char)c[0] == 226 && (unsigned char)c[1] == 150 &&
-		136 <= (unsigned char)c[2] && (unsigned char)c[2] <= 143)
-		return 1;
+	if((unsigned char)c[0] == 226)
+	{
+		int t = (unsigned char)c[1];
+		if(148 <= t && t <= 150)
+			return 1;
+	}
 	return min(2, get_utf8_len(*c));
+}
+
+int get_string_width(const string &t)
+{
+	int res = 0;
+	for(int i=0; i<(int)t.size(); i+=get_utf8_len(t[i]))
+		res += get_utf8_width(t.c_str() + i);
+	return res;
 }
 
 vector<string> process_symbols = {
@@ -229,15 +240,12 @@ void display_quit(void)
 				return;
 			}
 			
-			if(c == 'A' || c == 'a')
+			if(c == 'A' || c == 'a' ||
+				c == 'S' || c == 's' ||
+				c == 'W' || c == 'w' ||
+				c == 'D' || c == 'd')
 			{
-				if(curopt == 1)
-					curopt = 0, reprint = 1;
-			}
-			if(c == 'D' || c == 'd')
-			{
-				if(curopt == 0)
-					curopt = 1, reprint = 1;
+				curopt ^= 1; reprint = 1;
 			}
 		}
 	}
@@ -304,10 +312,49 @@ void display_basic0(vector<string> s, vector<string> msg, vector<string> opt, in
 	}
 	else
 	{
-		riglist.push_back("当前没有作业");
+		riglist.push_back("当前无作业");
 	}
 	
 	riglist.push_back("作业逾期：" + to_string(homework_failed_count) + "次");
+	
+	// int rig_W = key[8].second - key[3].second + 1;
+	
+	if(game_value == 0)
+	{
+		riglist.push_back("???");
+	}
+	else
+	{
+		auto t = "游戏Lv." + to_string(game_value_lvl)
+			+ " (" + to_string(game_value)
+			+ "/" + to_string(game_value_lvl_next) + ")";
+		riglist.push_back(t);
+	}
+	
+	if(music_value == 0)
+	{
+		riglist.push_back("???");
+	}
+	else
+	{
+		auto t = "音乐Lv." + to_string(music_value_lvl)
+			+ " (" + to_string(music_value)
+			+ "/" + to_string(music_value_lvl_next) + ")";
+		riglist.push_back(t);
+	}
+	
+	if(society_value == 0)
+	{
+		riglist.push_back("???");
+	}
+	else
+	{
+		auto t = "社交Lv." + to_string(society_value_lvl)
+			+ " (" + to_string(society_value)
+			+ "/" + to_string(society_value_lvl_next) + ")";
+		riglist.push_back(t);
+	}
+	
 	
 	curx = key[3].first;
 	for(int i=0; i<(int)riglist.size(); ++i)
@@ -386,7 +433,7 @@ void display_basic1(vector<string> msg, vector<string> opt, int curopt)
 		"┏━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┓",
 		"┃ 9                                                                                              ┃",
 		"┣━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┳━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┫",
-		"┃ 0                                                             1  ┃ 3                           ┃",
+		"┃ 0                                                             1  ┃ 3                         8 ┃",
 		"┃                                                                  ┃                             ┃",
 		"┃                                                                  ┃                             ┃",
 		"┃                                                                  ┃                             ┃",
@@ -409,66 +456,29 @@ void display_basic1(vector<string> msg, vector<string> opt, int curopt)
 		"┃                                                                  ┃                             ┃",
 		"┃                                                                  ┃                             ┃",
 		"┃                                                                  ┃                             ┃",
-		"┣━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┯━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┻━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┫",
-		"┃ 4                             7 │ 5                                                          6 ┃",
-		"┃                                 │                                                              ┃",
-		"┃                                 │                                                              ┃",
-		"┃                                 │                                                              ┃",
-		"┗━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┷━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┛",
+		"┣━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┯━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┻━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┫",
+		"┃ 4                               7 │ 5                                                        6 ┃",
+		"┃                                   │                                                            ┃",
+		"┃                                   │                                                            ┃",
+		"┃                                   │                                                            ┃",
+		"┗━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┷━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┛",
 	};
 	
 	display_basic0(s, msg, opt, curopt);
 }
 
-void display_basic2(vector<string> msg)
-{
-	vector<string> s = {
-		"┏━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┓",
-		"┃ 9                                                                                              ┃",
-		"┣━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┳━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┫",
-		"┃ 0                                                             1  ┃ 3                           ┃",
-		"┃                                                                  ┃                             ┃",
-		"┃                                                                  ┃                             ┃",
-		"┃                                                                  ┃                             ┃",
-		"┃                                                                  ┃                             ┃",
-		"┃                                                                  ┃                             ┃",
-		"┃                                                                  ┃                             ┃",
-		"┃                                                                  ┃                             ┃",
-		"┃                                                                  ┃                             ┃",
-		"┃                                                                  ┃                             ┃",
-		"┃                                                                  ┃                             ┃",
-		"┃                                                                  ┃                             ┃",
-		"┃                                                                  ┃                             ┃",
-		"┃ 2                                                                ┃                             ┃",
-		"┃                                                                  ┃                             ┃",
-		"┃                                                                  ┃                             ┃",
-		"┃                                                                  ┃                             ┃",
-		"┃                                                                  ┃                             ┃",
-		"┃                                                                  ┃                             ┃",
-		"┃                                                                  ┃                             ┃",
-		"┃                                                                  ┃                             ┃",
-		"┃                                                                  ┃                             ┃",
-		"┃                                                                  ┃                             ┃",
-		"┣━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┯━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┻━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┫",
-		"┃ 4                             7 │ 5                                                          6 ┃",
-		"┃                                 │                                                              ┃",
-		"┃                                 │                                                              ┃",
-		"┃                                 │                                                              ┃",
-		"┗━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┷━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┛",
-	};
-	
-	display_basic0(s, msg, {}, -1);
-}
-
-int display(vector<string> msg, vector<string> opt)
+int display(vector<string> msg, vector<string> opt,bool fade_in = 1,int defaultopt = 0)
 {
 	bool reprint = 0;
-	int curopt = 0;
+	int curopt = max(0, min((int)opt.size(), defaultopt));
 	
-	for(int i=-1; i<(int)msg.size(); ++i)
+	if(fade_in)
 	{
-		display_basic1(vector<string>(msg.begin(), msg.begin() + i + 1), {}, -1);
-		Sleep(100);
+		for(int i=-1; i<(int)msg.size(); ++i)
+		{
+			display_basic1(vector<string>(msg.begin(), msg.begin() + i + 1), {}, -1);
+			Sleep(100);
+		}
 	}
 	
 	while(kbhit()) getch();
@@ -530,13 +540,31 @@ int display(vector<string> msg, vector<string> opt)
 
 void display_lose(vector<string> msg)
 {
+	msg.push_back("你达成了：坏结局");
 	msg.push_back("按Q结束游戏");
 	display(msg, {});
 	exit(0);
 }
 
-void display_win(vector<string> msg)
+void display_normal(vector<string> msg)
 {
+	msg.push_back("你达成了：普通结局");
+	msg.push_back("按Q结束游戏");
+	display(msg, {});
+	exit(0);
+}
+
+void display_good(vector<string> msg)
+{
+	msg.push_back("你达成了：好结局");
+	msg.push_back("按Q结束游戏");
+	display(msg, {});
+	exit(0);
+}
+
+void display_perfect(vector<string> msg)
+{
+	msg.push_back("你达成了：完美结局，恭喜！");
 	msg.push_back("按Q结束游戏");
 	display(msg, {});
 	exit(0);
