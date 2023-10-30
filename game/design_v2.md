@@ -40,7 +40,6 @@ idea 个数 $Idea$
 
 - 初始 $Game = 0$
 - 游戏分 Level：$Gamelvl$，从 $0$ 开始
-- 第 $i$ 个 lvl 需要的能力值为 $2i^2$。
 
 
 
@@ -48,7 +47,6 @@ idea 个数 $Idea$
 
 - 初始 $Music = 0$
 - 音乐分 Level：$Musiclvl$，从 $0$ 开始
-- 第 $i$ 个 lvl 需要的能力值为 $2i^2$。
 
 
 
@@ -56,7 +54,12 @@ idea 个数 $Idea$
 
 - 初始 $Society = 0$
 - 社交能力值分 Level：$Societylvl$，从 $0$ 开始。
-- 第 $i$ 个 lvl 需要的能力值为 $2i^2$。
+
+
+
+提升到 Lv. $i$ 需要的能力值为：
+
+- $\lfloor 1.1 i^2\rfloor$
 
 
 
@@ -86,13 +89,13 @@ idea 个数 $Idea$
   - $H:=H-2$
 
 - （完成）打游戏
-  - $E := E+10+gamelvl\times 5$
+  - $E := E+15+gamelvl\times 5$
   - $H:= H - 10$
   - $Game:= Game+rand(1,2)$
 
 - （完成）练琴
   - $E:=E-3$
-  - $H:=H+1+musiclvl \times 2$
+  - $H:=H+3+musiclvl \times 2$
   - $Music:=Music+rand(1,2)$
 
 - （完成）阅读一些时政新闻
@@ -132,7 +135,7 @@ idea 个数 $Idea$
 
 - （完成）周一周三上课
 - （完成）每周一布置作业，考试周除外
-- （完成）作业量为 $rand_2(20 + 2\times weekid, 40+2\times weekid)$
+- （完成）作业量为 $rand_2(20 + weekid, 35+weekid)$
 - （完成）作业 ddl 为下周天，作业做不完会导致:
   - $H:=H-30$
   - 三次做不完就退学
@@ -161,7 +164,7 @@ idea 个数 $Idea$
 - （完成）周二上课
 - （完成）可以选择听课
   - $E:=E-5$，
-  - $H:=H+7$，
+  - $H:=H+10$，
   - $Society:=Society+1$
 
 - 可以选择不听课，去干平时的事情，有改变：
