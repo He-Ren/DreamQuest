@@ -11,6 +11,11 @@ enum Lesson_id
 	Nolesson, Calculus, Development
 };
 
+int get_lvl_require(int i)
+{
+	return int(i * i * 1.1);
+}
+
 set<int> exam_set = {15, 30};
 
 void update_energe_value(int delta)
@@ -381,7 +386,7 @@ void action_play_game(Lesson_id)
 {
 	vector<string> msg;
 	
-	int delta_E = 10 + game_value_lvl * 5;
+	int delta_E = 15 + game_value_lvl * 5;
 	int delta_H = -10;
 	int delta_G = rnd(1,2);
 	
@@ -408,7 +413,7 @@ void action_play_game(Lesson_id)
 	{
 		lvl_up = 1;
 		++game_value_lvl;
-		game_value_lvl_next = 2 * (game_value_lvl + 1) * (game_value_lvl + 1);
+		game_value_lvl_next = get_lvl_require(game_value_lvl + 1);
 	}
 	
 	if(lvl_up)
@@ -431,7 +436,7 @@ void action_practice_music(Lesson_id)
 	vector<string> msg;
 	
 	int delta_E = -3;
-	int delta_H = 1 + music_value_lvl * 2;
+	int delta_H = 3 + music_value_lvl * 2;
 	int delta_M = rnd(1,2);
 	
 	msg.push_back("你练了一会琴");
@@ -452,7 +457,7 @@ void action_practice_music(Lesson_id)
 	{
 		lvl_up = 1;
 		++music_value_lvl;
-		music_value_lvl_next = 2 * (music_value_lvl + 1) * (music_value_lvl + 1);
+		music_value_lvl_next = get_lvl_require(music_value_lvl + 1);
 	}
 	
 	if(lvl_up)
@@ -492,7 +497,7 @@ void action_read_news(Lesson_id)
 	{
 		lvl_up = 1;
 		++society_value_lvl;
-		society_value_lvl_next = 2 * (society_value_lvl + 1) * (society_value_lvl + 1);
+		society_value_lvl_next = get_lvl_require(society_value_lvl + 1);
 	}
 	
 	if(lvl_up)
@@ -577,11 +582,22 @@ void action_attend_concert(Lesson_id)
 	
 	msg.push_back("你参加了一场音乐会");
 	
-	msg.push_back("你对未来充满希望");
-	
 	update_energe_value(delta_E);
 	update_hope_value(delta_H);
 	music_value += delta_M;
+	
+	bool lvl_up = 0;
+	while(music_value >= music_value_lvl_next)
+	{
+		lvl_up = 1;
+		++music_value_lvl;
+		music_value_lvl_next = get_lvl_require(music_value_lvl + 1);
+	}
+	
+	if(lvl_up)
+		msg.push_back("你的音乐等级提升了！");
+	
+	msg.push_back("你对未来充满希望");
 	
 	display(msg, {
 		"确定"
@@ -785,7 +801,7 @@ void lesson_calculus(int week_id, int weekday_id)
 		}
 		else
 		{
-			int t = rnd2(20 + 2 * week_id, 40 + 2 * week_id);
+			int t = rnd2(20 + week_id, 35 + week_id);
 			msg.push_back("这周的作业有 " + to_string(t) + " 道题");
 			homework_tot = t;
 			homework_finished = 0;
@@ -873,7 +889,7 @@ void lesson_development(int week_id, int weekday_id)
 		if(t == 0)
 		{
 			int delta_E = -5;
-			int delta_H = 7;
+			int delta_H = 10;
 			int delta_S = 1;
 			
 			update_energe_value(delta_E);
@@ -898,7 +914,7 @@ void lesson_development(int week_id, int weekday_id)
 			{
 				lvl_up = 1;
 				++society_value_lvl;
-				society_value_lvl_next = 2 * (society_value_lvl + 1) * (society_value_lvl + 1);
+				society_value_lvl_next = get_lvl_require(society_value_lvl + 1);
 			}
 			
 			if(lvl_up)
@@ -1367,15 +1383,15 @@ int main(void)
 	
 	game_value = 0;
 	game_value_lvl = 0;
-	game_value_lvl_next = 2;
+	game_value_lvl_next = get_lvl_require(1);
 	
 	music_value = 0;
 	music_value_lvl = 0;
-	music_value_lvl_next = 2;
+	music_value_lvl_next = get_lvl_require(1);
 	
 	society_value = 0;
 	society_value_lvl = 0;
-	society_value_lvl_next = 2;
+	society_value_lvl_next = get_lvl_require(1);
 	
 	next_exam_date = -1;
 	next_exam_require = -1;
