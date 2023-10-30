@@ -14,10 +14,19 @@ int calculus_value;// 微积分能力值
 
 int idea_count;// idea 个数
 int paper_count;// paper 个数
+int idea_tot;// 历史 idea 总数
 
 int game_value;// 游戏能力值
+int game_value_lvl;
+int game_value_lvl_next;
+
 int music_value;// 音乐能力值
+int music_value_lvl;
+int music_value_lvl_next;
+
 int society_value;// 社会能力值
+int society_value_lvl;
+int society_value_lvl_next;
 
 int homework_tot;// 作业总数
 int homework_ddl;// 作业ddl
